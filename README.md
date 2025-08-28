@@ -41,7 +41,7 @@ A lightweight, no-build web app for live drawing and media overlay, with a moder
 
 Moderator UI (tools, catalog, 7TV):
 ![ru](Screenshot_4.png)
-![en](Screenshot_5.png)
+![en](Screenshot_2.png)
 
 ## Directory Structure
 ```
@@ -55,7 +55,7 @@ realtime-canvas/
 ```
 
 ## 7TV Emote Sets
-- Paste a 7TV Emote Set ID and press “Добавить сет”.
+- Paste a 7TV Emote Set ID and press “Add Set”.
 - Saved sets appear as vertical chips; click to reload, ✕ to remove.
 - Search box filters the loaded set.
 
