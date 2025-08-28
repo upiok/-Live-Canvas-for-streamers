@@ -45,7 +45,7 @@ Moderator UI (tools, catalog, 7TV):
 
 ## Directory Structure
 ```
-realtime-canvas/
+Live-canvas/
   public/
     mod.html      # Moderator UI
     view.html     # Viewer (green background)
