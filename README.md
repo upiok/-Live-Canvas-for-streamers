@@ -49,6 +49,7 @@ realtime-canvas/
   public/
     mod.html      # Moderator UI
     view.html     # Viewer (green background)
+    mod-en.html   # Moderator UI (English ver.)
   server.js       # Static hosting + SSE endpoints
   package.json    # npm start script
   README.md
