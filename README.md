@@ -40,7 +40,7 @@ A lightweight, no-build web app for live drawing and media overlay, with a moder
 ## Screenshots
 
 
- !Moderator UI (tools, catalog, 7TV):
+ ![Moderator UI (tools, catalog, 7TV):](Screenshot_4.png)
 
 
 ## Directory Structure
