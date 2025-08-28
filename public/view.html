@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Viewer — Green Screen</title>
+    <style>
+      html, body { margin:0; height:100%; }
+      body { display:flex; align-items:center; justify-content:center; background:#00ff00; }
+      #wrap { position: relative; }
+      #drawing { position:absolute; left:0; top:0; }
+      .media { position:absolute; }
+      video.media { pointer-events: none; }
+      #sound { position: fixed; right: 12px; bottom: 12px; padding: 8px 10px; background: rgba(0,0,0,0.65); color: #fff; border: 1px solid #333; border-radius: 8px; cursor: pointer; font-family: system-ui, Arial, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="wrap">
+      <canvas id="drawing"></canvas>
+    </div>
+    <button id="sound" title="Включить звук" style="display:none;">Включить звук</button>
+
+    <script>
+      const serverUrl = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3001' : location.origin;
+      const evt = new EventSource(serverUrl + '/events');
+      const wrap = document.getElementById('wrap');
+      const drawing = document.getElementById('drawing');
+      const ctx = drawing.getContext('2d');
+      let mediaMap = new Map();
+
+      function ensureSize(w,h){
+        wrap.style.width = w + 'px';
+        wrap.style.height = h + 'px';
+        drawing.width = w; drawing.height = h;
+      }
+
+      function applyState(state){
+        ensureSize(state.size.w, state.size.h);
+        // draw PNG layer
+        const img = new Image();
+        img.onload = () => { ctx.clearRect(0,0,drawing.width,drawing.height); ctx.drawImage(img,0,0); };
+        img.src = state.drawing;
+
+        // sync media
+        const seen = new Set();
+        for (const m of state.media){
+          seen.add(m.id);
+          let el = mediaMap.get(m.id);
+          if (!el){
+            el = document.createElement(m.type === 'youtube' ? 'iframe' : (m.type === 'video' ? 'video' : 'img'));
+            el.className = 'media';
+            if (m.type === 'youtube') {
+              el.src = addYouTubeParams(m.src);
+              el.allow = 'autoplay; encrypted-media';
+              el.referrerPolicy = 'no-referrer-when-downgrade';
+              el.frameBorder = '0';
+            } else {
+              el.src = m.src;
+              if (m.type === 'video'){ el.autoplay = true; el.loop = true; el.muted = false; el.volume = 1.0; el.playsInline = true; el.addEventListener('canplay', () => { try { el.play(); } catch {} }); }
+            }
+            wrap.appendChild(el);
+            mediaMap.set(m.id, el);
+          }
+          el.style.left = m.x + 'px';
+          el.style.top = m.y + 'px';
+          el.style.width = m.w + 'px';
+          el.style.height = m.h + 'px';
+        }
+        // remove missing
+        for (const [id, el] of mediaMap.entries()){
+          if (!seen.has(id)){ el.remove(); mediaMap.delete(id); }
+        }
+      }
+
+      evt.onmessage = (e) => {
+        try{
+          const data = JSON.parse(e.data);
+          if (data.type === 'state') applyState(data.payload);
+        }catch(err){ console.warn(err); }
+      };
+
+      // Autoplay with sound handling
+      const soundBtn = document.getElementById('sound');
+      function tryUnmuteAll() {
+        let needButton = false;
+        for (const el of mediaMap.values()) {
+          if (el.tagName === 'VIDEO') {
+            try {
+              el.muted = false; el.volume = 1.0; el.play();
+            } catch { needButton = true; }
+          }
+        }
+        soundBtn.style.display = needButton ? 'block' : 'none';
+      }
+      document.addEventListener('click', tryUnmuteAll, { once: true });
+      soundBtn.addEventListener('click', () => { tryUnmuteAll(); soundBtn.style.display = 'none'; });
+
+      function addYouTubeParams(embedUrl){
+        try{
+          const u = new URL(embedUrl);
+          u.searchParams.set('autoplay','1');
+          u.searchParams.set('mute','0');
+          u.searchParams.set('controls','0');
+          u.searchParams.set('rel','0');
+          return u.toString();
+        }catch{ return embedUrl; }
+      }
+    </script>
+  </body>
+  </html>
+
+
