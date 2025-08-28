@@ -15,7 +15,7 @@ A lightweight, no-build web app for live drawing and media overlay, with a moder
 1. Install Node.js 18+.
 2. Start the server:
    ```bash
-   cd realtime-canvas
+   cd -Live-Canvas-for-streamers-main
    npm start
    ```
    The server will run on `http://localhost:3001` (or the next free port).
